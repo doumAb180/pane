@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private var statusItem: NSStatusItem!
     private let popover = NSPopover()
     private var model: AppModel!
@@ -17,6 +17,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         model = AppModel()
         model.onHotKeyResult = { [weak self] message, error in self?.showToast(message, error: error) }
+        model.onBeginRecording = { [weak self] in
+            NSApp.activate(ignoringOtherApps: true)
+            self?.popover.contentViewController?.view.window?.makeKey()
+        }
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
             button.image = NSImage(systemSymbolName: "rectangle.split.2x1", accessibilityDescription: "Pane 창 배치")
@@ -25,12 +29,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             button.toolTip = "Pane · 창을 제자리에"
         }
         popover.behavior = .transient
+        popover.delegate = self
         popover.animates = true
         popover.contentViewController = NSHostingController(rootView: PanelView(model: model))
         if !UserDefaults.standard.bool(forKey: "hasLaunched") {
             UserDefaults.standard.set(true, forKey: "hasLaunched")
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { self.togglePopover() }
         }
+    }
+
+    func popoverDidClose(_ notification: Notification) {
+        model.cancelRecording()
     }
 
     @objc private func togglePopover() {

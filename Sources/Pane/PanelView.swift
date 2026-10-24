@@ -7,6 +7,7 @@ private let accent = Color(red: 0.34, green: 0.40, blue: 0.94)
 struct PanelView: View {
     @ObservedObject var model: AppModel
     @State private var settings = false
+    @State private var confirmReset = false
     private let permissionTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -18,10 +19,17 @@ struct PanelView: View {
             footer
         }
         .padding(24)
-        .frame(width: 420, height: settings ? 570 : 690)
+        .frame(width: 420, height: 690)
         .background(Color(nsColor: .windowBackgroundColor).opacity(0.96))
         .tint(accent)
         .onReceive(permissionTimer) { _ in model.refreshPermission() }
+        .onDisappear { model.cancelRecording() }
+        .alert("모든 단축키를 기본값으로 되돌릴까요?", isPresented: $confirmReset) {
+            Button("취소", role: .cancel) {}
+            Button("기본값 복원", role: .destructive) { model.resetShortcuts() }
+        } message: {
+            Text("직접 지정한 단축키가 모두 Control + Option 기본 조합으로 바뀝니다.")
+        }
     }
 
     private var header: some View {
@@ -42,7 +50,10 @@ struct PanelView: View {
                     .font(.system(size: 11)).foregroundStyle(.secondary)
             }
             Spacer()
-            Button { withAnimation(.easeInOut(duration: 0.15)) { settings.toggle() } } label: {
+            Button {
+                model.cancelRecording()
+                withAnimation(.easeInOut(duration: 0.15)) { settings.toggle() }
+            } label: {
                 Image(systemName: settings ? "arrow.left" : "slider.horizontal.3")
                     .font(.system(size: 15, weight: .medium)).frame(width: 32, height: 32)
                     .background(.primary.opacity(0.045), in: RoundedRectangle(cornerRadius: 10))
@@ -110,9 +121,8 @@ struct PanelView: View {
             }
             Divider()
             Toggle("전역 단축키", isOn: $model.shortcutsEnabled).toggleStyle(.switch)
-            Toggle("단축키에 Command 추가", isOn: $model.extraCommand).toggleStyle(.switch)
-            Text("현재 조합  \(model.modifierLabel) + 키\n다른 창 관리 앱과 충돌하면 Command를 추가하거나 해당 앱의 단축키를 꺼 주세요.")
-                .font(.system(size: 12)).foregroundStyle(.secondary).lineSpacing(4)
+                .disabled(model.recordingAction != nil)
+            shortcutPreferences
             if !model.shortcutFailures.isEmpty {
                 Label("등록하지 못한 단축키: \(model.shortcutFailures.joined(separator: ", "))", systemImage: "exclamationmark.triangle")
                     .font(.system(size: 11)).foregroundStyle(.orange)
@@ -142,7 +152,7 @@ struct PanelView: View {
                 Spacer(minLength: 0)
             }.frame(minHeight: 28, alignment: .topLeading).accessibilityElement(children: .combine)
             HStack {
-                Text("\(model.modifierLabel) + 키로 더 빠르게")
+                Text(model.recordingAction != nil ? "단축키 녹음 중 · 창 배치 일시 정지" : "설정에서 나만의 단축키를 지정하세요")
                 Spacer()
                 Button("종료") { NSApp.terminate(nil) }.buttonStyle(.plain)
             }.font(.system(size: 10)).foregroundStyle(.tertiary)
@@ -160,7 +170,7 @@ struct PanelView: View {
     private func tileRow(_ actions: [Action]) -> some View {
         HStack(spacing: 8) {
             ForEach(actions, id: \.rawValue) { action in
-                LayoutTile(action: action, shortcut: model.modifierLabel + action.key.label) { model.perform(action) }
+                LayoutTile(action: action, shortcut: model.shortcutLabel(for: action)) { model.perform(action) }
             }
         }
     }
@@ -171,18 +181,71 @@ struct PanelView: View {
                 Image(systemName: icon).foregroundStyle(accent)
                 Text(action == .restore ? "복원" : "가운데")
                 Spacer(minLength: 2)
-                Text(action.key.label).foregroundStyle(.tertiary)
+                Text(model.shortcutLabel(for: action)).foregroundStyle(.tertiary).lineLimit(1).minimumScaleFactor(0.7)
             }.font(.system(size: 11)).padding(12)
                 .background(.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 10))
-        }.buttonStyle(.plain).help(action.title + " · " + model.modifierLabel + action.key.label)
+        }.buttonStyle(.plain).help(action.title + " · " + model.shortcutLabel(for: action))
     }
 
     private func monitorButton(_ action: Action, icon: String) -> some View {
         Button { model.perform(action) } label: {
             Image(systemName: icon).font(.system(size: 12)).frame(width: 32, height: 26)
                 .background(.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
-        }.buttonStyle(.plain).help(action.title + " · " + model.modifierLabel + action.key.label)
+        }.buttonStyle(.plain).help(action.title + " · " + model.shortcutLabel(for: action))
             .accessibilityLabel(action.title)
+    }
+
+    private var shortcutPreferences: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionLabel("단축키 녹음", detail: "키 조합을 눌러 변경")
+            Text("오른쪽 단축키를 클릭한 뒤 새 조합을 누르세요. Control·Option·Command 중 하나 이상을 포함해야 합니다.")
+                .font(.system(size: 11)).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            VStack(spacing: 0) {
+                ForEach(Action.allCases, id: \.rawValue) { action in
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text(action.title).font(.system(size: 12))
+                            Spacer(minLength: 8)
+                            Button {
+                                if model.recordingAction == action { model.cancelRecording() }
+                                else { model.startRecording(action) }
+                            } label: {
+                                Text(model.recordingAction == action ? "키를 눌러 주세요…" : model.shortcutLabel(for: action))
+                                    .font(.system(size: 12, weight: .medium, design: .monospaced))
+                                    .padding(.horizontal, 10).padding(.vertical, 7)
+                                    .frame(minWidth: 88)
+                                    .background(model.recordingAction == action ? accent.opacity(0.16) : .primary.opacity(0.05),
+                                                in: RoundedRectangle(cornerRadius: 8))
+                                    .overlay(RoundedRectangle(cornerRadius: 8)
+                                        .strokeBorder(model.recordingAction == action ? accent : .clear))
+                            }.buttonStyle(.plain)
+                                .accessibilityLabel("\(action.title) 단축키 변경")
+                                .accessibilityValue(model.shortcutLabel(for: action))
+                        }
+                        if model.recordingAction == action {
+                            HStack(alignment: .top, spacing: 8) {
+                                Text(model.recordingMessage)
+                                    .foregroundStyle(model.recordingError ? Color.orange : accent)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                Spacer(minLength: 0)
+                                Button("취소") { model.cancelRecording() }.buttonStyle(.borderless)
+                            }.font(.system(size: 11))
+                        }
+                    }.padding(.vertical, 8)
+                    if action != Action.allCases.last { Divider() }
+                }
+            }
+            if model.recordingAction == nil, !model.recordingMessage.isEmpty {
+                Text(model.recordingMessage).font(.system(size: 11)).foregroundStyle(.secondary)
+            }
+            Button("모든 단축키 기본값 복원") { confirmReset = true }
+                .buttonStyle(.borderless).font(.system(size: 11))
+                .disabled(model.recordingAction != nil || model.bindings.overrides.isEmpty)
+            Text("Pane에 저장된 단축키와 중복되면 저장하지 않습니다. macOS나 다른 앱이 사용하는 조합은 직접 확인해 주세요.")
+                .font(.system(size: 11)).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 

@@ -1,4 +1,5 @@
 import Carbon
+import PaneCore
 
 final class HotKeys {
     private var handler: EventHandlerRef?
@@ -25,16 +26,16 @@ final class HotKeys {
         if status != noErr { failures = ["단축키 이벤트 등록 실패 (\(status))"] }
     }
 
-    func register(enabled: Bool, extraCommand: Bool) {
+    func register(enabled: Bool, bindings: ShortcutBindings) {
         unregister()
         guard enabled else { failures = []; return }
         guard handler != nil else { failures = ["단축키 이벤트를 등록할 수 없습니다."]; return }
         failures = []
-        let modifiers = UInt32(controlKey | optionKey | (extraCommand ? cmdKey : 0))
         for action in Action.allCases {
+            guard let shortcut = bindings[action.shortcutID] else { continue }
             var reference: EventHotKeyRef?
             let identifier = EventHotKeyID(signature: Self.signature, id: UInt32(action.rawValue))
-            let status = RegisterEventHotKey(action.key.code, modifiers, identifier,
+            let status = RegisterEventHotKey(shortcut.keyCode, shortcut.carbonModifiers, identifier,
                                              GetApplicationEventTarget(), 0, &reference)
             if status == noErr, let reference { registrations.append(reference) }
             else { failures.append(action.title) }

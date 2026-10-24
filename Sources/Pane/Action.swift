@@ -5,6 +5,34 @@ enum Action: Int, CaseIterable {
     case left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight
     case firstThird, middleThird, lastThird, maximize, center, restore, previousScreen, nextScreen
 
+    var shortcutID: String {
+        switch self {
+        case .left: return "left"
+        case .right: return "right"
+        case .top: return "top"
+        case .bottom: return "bottom"
+        case .topLeft: return "topLeft"
+        case .topRight: return "topRight"
+        case .bottomLeft: return "bottomLeft"
+        case .bottomRight: return "bottomRight"
+        case .firstThird: return "firstThird"
+        case .middleThird: return "middleThird"
+        case .lastThird: return "lastThird"
+        case .maximize: return "maximize"
+        case .center: return "center"
+        case .restore: return "restore"
+        case .previousScreen: return "previousScreen"
+        case .nextScreen: return "nextScreen"
+        }
+    }
+
+    static func defaultShortcuts(extraCommand: Bool) -> [String: Shortcut] {
+        Dictionary(uniqueKeysWithValues: allCases.map {
+            ($0.shortcutID, Shortcut(keyCode: $0.key.code,
+                                    modifiers: extraCommand ? [.control, .option, .command] : [.control, .option]))
+        })
+    }
+
     var title: String {
         switch self {
         case .left: return "왼쪽 절반"

@@ -61,12 +61,13 @@ If permission prompts persist after an update, see the reset instructions under 
 - Horizontal and vertical splits, corners, thirds, maximize, and center
 - Restore the previous layout for each window; repeat Restore to switch between its last two layouts
 - Move windows between displays, using the space available around the menu bar and Dock
-- Adjustable gaps, a global shortcut toggle, and an optional Command modifier to avoid conflicts
+- Adjustable gaps and a global shortcut toggle
+- Per-action shortcut recording, duplicate detection within Pane, and persistent custom bindings
 - Selected app and action feedback in the panel
 
 ## Keyboard shortcuts
 
-The default modifier is **Control + Option (⌃⌥)**. Enable the additional Command modifier in settings to use **⌃⌥⌘** instead. Hover over a tile to see its shortcut.
+The default modifier is **Control + Option (⌃⌥)**. Hover over a tile to see its current shortcut. The table below lists the defaults.
 
 | Key | Action |
 | --- | --- |
@@ -78,19 +79,30 @@ The default modifier is **Control + Option (⌃⌥)**. Enable the additional Com
 | Delete | Restore the previous layout |
 | P / N | Previous / next display |
 
+### Customize shortcuts
+
+1. Open **Pane → Settings** (the sliders icon).
+2. Under **단축키 녹음** (Record shortcuts), click the shortcut next to an action.
+3. Press the new combination, including at least one of **Control, Option, or Command**. Shift can also be included.
+4. Release the key to save. Changes apply immediately and persist after restarting Pane.
+
+If another Pane action already uses the combination, Pane shows that action's name and keeps the existing binding. Try another combination, or press **Esc** / click **취소** (Cancel). Closing the panel or switching apps also cancels recording. Pane's global shortcuts pause while recording.
+
+Use **모든 단축키 기본값 복원** (Restore all defaults) to reset the bindings after confirmation. Existing settings that added Command to all shortcuts are preserved when upgrading. Conflict checking covers Pane's saved shortcuts; macOS and other apps can reserve combinations that Pane cannot capture or register.
+
 Letter shortcuts use the physical key positions of a US keyboard. Displays follow the order provided by macOS and wrap around at either end.
 
 <a id="사용-팁"></a>
 
 ## Tips
 
-- If Spectacle, Rectangle, or another app uses the same shortcuts, disable those bindings or enable the additional Command modifier in Pane. Shortcuts that could not be registered appear in settings.
+- If Spectacle, Rectangle, or another app uses the same shortcuts, disable those bindings or record different combinations in Pane. Shortcuts that could not be registered appear in settings.
 - Some apps enforce a minimum window size and may prevent a quarter-size layout. Pane reports when the resulting size is constrained.
 - Exit full-screen mode before arranging a window. Maximize fits the current display's available area without creating a separate Space.
 - Manually moving or resizing a window resets the next directional placement to half size. A window already at the exact half-size position switches to quarter size.
 - If permission stops working after moving or replacing the app, quit Pane, remove it from the accessibility list, and add it again from its actual installation path. If the problem persists, run `tccutil reset Accessibility io.github.doumAb180.Pane` to reset **only Pane's permission**, then add and enable it again.
 - To launch at login, add Pane in **System Settings → General → Login Items**.
-- The current version supports shortcuts and panel controls. Drag-to-edge snapping and individual shortcut customization are not yet available.
+- The current version supports shortcuts and panel controls. Drag-to-edge snapping is not yet available.
 
 ## Development and distribution
 
@@ -106,7 +118,7 @@ open dist
 Move the generated `dist/Pane.app` into Applications, launch it, and follow **First launch** above.
 
 ```sh
-swift test                        # Layout, coordinate, and display movement tests
+swift test                        # Layout, display, shortcut conflict, and recording tests
 bash scripts/build.sh             # App, DMG, and ZIP for the current Mac
 bash scripts/build.sh --universal # App, DMG, and ZIP for Apple Silicon and Intel
 bash scripts/package-dmg.sh       # Package the existing dist/Pane.app without rebuilding
@@ -124,8 +136,8 @@ git push origin v0.1.0
 | Path | Purpose |
 | --- | --- |
 | `Sources/Pane` | Panel, settings, shortcuts, and accessibility-based window control |
-| `Sources/PaneCore` | Layout cycling and screen geometry |
-| `Tests/PaneCoreTests` | Layout and multi-display logic tests |
+| `Sources/PaneCore` | Layout cycling, screen geometry, and shortcut bindings |
+| `Tests` | Layout, multi-display, shortcut persistence, and recording tests |
 | `scripts` | App bundle, icon, DMG, and ZIP generation |
 | `Casks/pane.rb` | Homebrew installation metadata and DMG checksum |
 
