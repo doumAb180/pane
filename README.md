@@ -1,25 +1,27 @@
 # Pane
 
-**모든 창이 제자리에.** macOS 메뉴 막대에서 실행하는 가벼운 창 배치 앱입니다.
+**English** | [한국어](README.ko.md)
 
-배치 모양을 보여주는 타일을 클릭하거나, 전역 단축키로 창을 정리하세요. SwiftUI와 AppKit으로 만들었으며 라이트·다크 모드를 지원합니다.
+**Every window in its place.** A lightweight window manager that lives in the macOS menu bar.
 
-## 설치
+Arrange windows with visual layout tiles or global keyboard shortcuts. Built with SwiftUI and AppKit, with support for light and dark mode.
 
-**macOS 13 이상 · Apple Silicon 및 Intel Mac 지원**
+## Installation
 
-아래 두 가지 방법 중 하나로 설치하세요.
+**macOS 13 or later · Apple Silicon and Intel Macs**
 
-### DMG로 설치
+Choose either installation method below.
 
-1. [최신 버전 다운로드](https://github.com/doumAb180/pane/releases/latest)에서 `Pane-버전-universal.dmg` 파일을 받습니다.
-2. DMG를 열고 **Pane.app을 Applications 폴더로 드래그**합니다.
-3. 응용 프로그램 폴더에서 **Pane**을 실행합니다.
-4. 화면 위 메뉴 막대에 Pane 아이콘이 나타나면 아래 **첫 실행 설정**을 진행합니다.
+### Install with a DMG
 
-### Homebrew로 설치
+1. Open the [latest release](https://github.com/doumAb180/pane/releases/latest) and download `Pane-<version>-universal.dmg`.
+2. Open the DMG and **drag Pane.app into Applications**.
+3. Launch **Pane** from your Applications folder.
+4. Once the Pane icon appears in your menu bar, follow **First launch** below.
 
-[Homebrew](https://brew.sh)가 설치되어 있다면 터미널에서 실행하세요.
+### Install with Homebrew
+
+If you have [Homebrew](https://brew.sh), run:
 
 ```sh
 brew tap doumab180/pane https://github.com/doumAb180/pane
@@ -27,21 +29,23 @@ brew install --cask doumab180/pane/pane
 open -a Pane
 ```
 
-이 저장소를 전용 tap으로 사용합니다. 설치 후 아래 **첫 실행 설정**을 진행하세요.
+This repository serves as a custom Homebrew tap. After installation, follow **First launch** below.
 
-### 첫 실행 설정
+### First launch
 
-1. 메뉴 막대에서 **Pane → 접근성 설정 열기**를 누릅니다.
-2. **시스템 설정 → 개인정보 보호 및 보안 → 접근성**에서 **Pane**을 켭니다. macOS 버전에 따라 **기기 제어 및 데이터 접근**으로 표시될 수 있습니다.
-3. 목록에 Pane이 없으면 **+**를 눌러 응용 프로그램 폴더의 `Pane.app`을 추가합니다.
-4. 배치할 앱의 창을 클릭하고 **Control + Option + ←**를 누릅니다. 한 번은 왼쪽 ½, 한 번 더 누르면 왼쪽 ¼로 배치됩니다.
+1. Click **Pane** in the menu bar and use the button that opens accessibility settings.
+2. Enable **Pane** in **System Settings → Privacy & Security → Accessibility**. Depending on your macOS version, this section may be labeled **Device Control & Data Access**.
+3. If Pane is missing from the list, click **+** and add `Pane.app` from your Applications folder.
+4. Select an app window and press **Control + Option + ←**. Press once for the left half, then again for the left quarter.
 
-접근성 권한은 다른 앱의 창을 이동하고 크기를 바꾸는 데 필요합니다. 단축키 대신 메뉴 막대의 Pane을 열어 배치 타일을 클릭해도 됩니다.
+Accessibility permission lets Pane move and resize other apps' windows. You can also open Pane from the menu bar and click a layout tile.
 
-### 업데이트
+The current app interface is in Korean; both English and Korean documentation are available.
 
-- **DMG로 설치한 경우:** Pane을 종료한 뒤 최신 DMG의 앱으로 기존 앱을 교체합니다.
-- **Homebrew로 설치한 경우:** Pane을 종료한 뒤 아래 명령을 실행합니다.
+### Updating
+
+- **DMG installation:** Quit Pane, then replace the installed app with the version from the latest DMG.
+- **Homebrew installation:** Quit Pane, then run:
 
 ```sh
 brew update
@@ -49,46 +53,48 @@ brew upgrade --cask doumab180/pane/pane
 open -a Pane
 ```
 
-업데이트 후 권한 안내가 계속 뜨면 [사용 팁](#사용-팁)의 권한 재설정 방법을 확인하세요.
+If permission prompts persist after an update, see the reset instructions under [Tips](#tips).
 
-## 주요 기능
+## Features
 
-- **반복해서 크기 전환**: 같은 방향을 반복하면 `½ → ¼ → ½`로 전환됩니다. 좌우는 높이를 유지하고, 상하는 너비를 유지합니다.
-- 좌우·상하 분할, 사분면, 3등분, 최대화, 가운데 정렬
-- 창별 이전 배치 복원 (복원을 반복하면 직전 두 배치 전환)
-- 모니터 간 이동과 메뉴 막대·Dock을 제외한 영역에 배치
-- 창 사이 여백 설정, 단축키 끄기, 충돌을 피하기 위한 Command 키 추가
-- 현재 대상 앱과 실행 결과 표시
+- **Repeat to resize:** Repeat the same direction to cycle through `½ → ¼ → ½`. Left and right keep the full available height; up and down keep the full available width.
+- Horizontal and vertical splits, corners, thirds, maximize, and center
+- Restore the previous layout for each window; repeat Restore to switch between its last two layouts
+- Move windows between displays, using the space available around the menu bar and Dock
+- Adjustable gaps, a global shortcut toggle, and an optional Command modifier to avoid conflicts
+- Selected app and action feedback in the panel
 
-## 단축키
+## Keyboard shortcuts
 
-기본 조합은 **Control + Option (⌃⌥)** 입니다. 설정에서 Command를 추가하면 **⌃⌥⌘** 조합이 됩니다. 타일에 포인터를 올리면 해당 단축키가 표시됩니다.
+The default modifier is **Control + Option (⌃⌥)**. Enable the additional Command modifier in settings to use **⌃⌥⌘** instead. Hover over a tile to see its shortcut.
 
-| 키 | 동작 |
+| Key | Action |
 | --- | --- |
-| ← / → / ↑ / ↓ | 해당 방향으로 ½ ↔ ¼ 전환 |
-| U / I / J / K | 왼쪽 위 / 오른쪽 위 / 왼쪽 아래 / 오른쪽 아래 |
-| D / F / G | 왼쪽 / 가운데 / 오른쪽 ⅓ |
-| Return | 최대화 |
-| C | 가운데 정렬 |
-| Delete | 이전 배치 복원 |
-| P / N | 이전 / 다음 모니터 |
+| ← / → / ↑ / ↓ | Cycle between ½ and ¼ along that edge |
+| U / I / J / K | Top left / top right / bottom left / bottom right |
+| D / F / G | Left / middle / right third |
+| Return | Maximize |
+| C | Center |
+| Delete | Restore the previous layout |
+| P / N | Previous / next display |
 
-문자 키는 영문 키보드의 물리적 위치를 기준으로 합니다. 모니터 순서는 macOS가 제공하는 화면 순서를 따르며 마지막 화면 다음에는 첫 화면으로 돌아갑니다.
+Letter shortcuts use the physical key positions of a US keyboard. Displays follow the order provided by macOS and wrap around at either end.
 
-## 사용 팁
+<a id="사용-팁"></a>
 
-- Spectacle, Rectangle 등 다른 앱이 같은 단축키를 사용한다면 해당 단축키를 끄거나 Pane 설정에서 Command 키를 추가하세요. 등록 실패한 단축키는 설정에 표시됩니다.
-- 일부 앱은 최소 창 크기가 있어 ¼ 배치를 제한할 수 있습니다. Pane이 실제 적용 결과를 안내합니다.
-- 전체 화면 모드에서는 먼저 전체 화면을 해제하세요. 최대화는 별도 Space를 만드는 전체 화면과 달리 현재 화면의 작업 영역에 창을 맞춥니다.
-- 창을 직접 옮기거나 크기를 바꾸면 다음 방향 배치는 다시 ½부터 시작합니다. 이미 정확히 ½ 위치에 있으면 ¼로 전환됩니다.
-- 앱을 옮기거나 새 빌드로 교체한 뒤 권한이 적용되지 않으면 Pane을 종료하고 접근성 목록에서 제거한 후, 실제 설치 위치의 앱을 다시 추가해 켜 주세요. 그래도 계속되면 `tccutil reset Accessibility io.github.doumAb180.Pane`으로 **Pane의 권한만** 초기화하고 다시 추가하세요.
-- 자동 실행은 **시스템 설정 → 일반 → 로그인 항목**에 Pane을 추가해서 설정할 수 있습니다.
-- 현재 버전은 단축키와 패널 배치를 지원합니다. 화면 가장자리 드래그 스냅과 개별 단축키 편집은 아직 지원하지 않습니다.
+## Tips
 
-## 개발 및 공유
+- If Spectacle, Rectangle, or another app uses the same shortcuts, disable those bindings or enable the additional Command modifier in Pane. Shortcuts that could not be registered appear in settings.
+- Some apps enforce a minimum window size and may prevent a quarter-size layout. Pane reports when the resulting size is constrained.
+- Exit full-screen mode before arranging a window. Maximize fits the current display's available area without creating a separate Space.
+- Manually moving or resizing a window resets the next directional placement to half size. A window already at the exact half-size position switches to quarter size.
+- If permission stops working after moving or replacing the app, quit Pane, remove it from the accessibility list, and add it again from its actual installation path. If the problem persists, run `tccutil reset Accessibility io.github.doumAb180.Pane` to reset **only Pane's permission**, then add and enable it again.
+- To launch at login, add Pane in **System Settings → General → Login Items**.
+- The current version supports shortcuts and panel controls. Drag-to-edge snapping and individual shortcut customization are not yet available.
 
-소스로 빌드하려면 Swift 5.9 이상을 지원하는 Xcode 또는 Command Line Tools가 필요합니다.
+## Development and distribution
+
+Building from source requires Xcode or Command Line Tools with Swift 5.9 or later.
 
 ```sh
 git clone https://github.com/doumAb180/pane.git
@@ -97,32 +103,32 @@ bash scripts/build.sh
 open dist
 ```
 
-생성된 `dist/Pane.app`을 응용 프로그램 폴더로 옮겨 실행하고, 위의 **첫 실행 설정**을 진행하세요.
+Move the generated `dist/Pane.app` into Applications, launch it, and follow **First launch** above.
 
 ```sh
-swift test                        # 배치·좌표·모니터 이동 테스트
-bash scripts/build.sh             # 현재 Mac용 앱, DMG, ZIP
-bash scripts/build.sh --universal # Apple Silicon + Intel 공용 앱, DMG, ZIP
-bash scripts/package-dmg.sh       # 기존 dist/Pane.app을 재빌드 없이 DMG로 포장
+swift test                        # Layout, coordinate, and display movement tests
+bash scripts/build.sh             # App, DMG, and ZIP for the current Mac
+bash scripts/build.sh --universal # App, DMG, and ZIP for Apple Silicon and Intel
+bash scripts/package-dmg.sh       # Package the existing dist/Pane.app without rebuilding
 ```
 
-결과물은 `dist/`에 생성됩니다. 버전을 지정하려면 `VERSION=0.2.0 bash scripts/build.sh --universal`처럼 실행하세요.
+Build outputs are written to `dist/`. To set a version, run `VERSION=0.2.0 bash scripts/build.sh --universal`.
 
-GitHub Actions가 `main` 업데이트와 PR에서 테스트·빌드를 실행합니다. `v0.1.0` 형태의 버전 태그를 푸시하면 Universal DMG·ZIP과 SHA-256 체크섬을 GitHub Releases에 게시하고, `main`의 Homebrew Cask를 해당 DMG의 체크섬으로 갱신합니다.
+GitHub Actions runs tests and builds on updates to `main` and pull requests. Pushing a version tag such as `v0.1.0` publishes a Universal DMG, ZIP, and SHA-256 checksums to GitHub Releases, then updates the Homebrew Cask on `main` with the DMG's checksum.
 
 ```sh
 git tag v0.1.0
 git push origin v0.1.0
 ```
 
-| 경로 | 역할 |
+| Path | Purpose |
 | --- | --- |
-| `Sources/Pane` | 패널, 설정, 단축키, 접근성 기반 창 제어 |
-| `Sources/PaneCore` | 배치 전환과 화면 좌표 계산 |
-| `Tests/PaneCoreTests` | 배치·다중 모니터 로직 테스트 |
-| `scripts` | 앱 번들·아이콘·DMG·ZIP 생성 |
-| `Casks/pane.rb` | Homebrew 설치 정보와 DMG 체크섬 |
+| `Sources/Pane` | Panel, settings, shortcuts, and accessibility-based window control |
+| `Sources/PaneCore` | Layout cycling and screen geometry |
+| `Tests/PaneCoreTests` | Layout and multi-display logic tests |
+| `scripts` | App bundle, icon, DMG, and ZIP generation |
+| `Casks/pane.rb` | Homebrew installation metadata and DMG checksum |
 
-외부 패키지 의존성, 분석 도구, 자동 업데이트는 없습니다. 설정은 이 Mac에 저장되며 창 정보는 외부로 전송하지 않습니다.
+No third-party package dependencies, analytics, or automatic updates. Settings stay on your Mac, and window information is never sent to an external service.
 
-Rectangle과 Spectacle에서 영감을 받은 독립 프로젝트입니다.
+An independent project inspired by Rectangle and Spectacle.
