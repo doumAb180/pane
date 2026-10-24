@@ -1,6 +1,6 @@
 cask "pane" do
-  version "0.1.0"
-  sha256 "fcc8d782dd8cac04261173ccf7f930d0b85eddaed17aca86db26da977e9773d6"
+  version "0.2.0"
+  sha256 "b38e8ed60f6445bcbf5c9d38bcd6ffa095097b96d26b04836e53476f9b24fe8c"
 
   url "https://github.com/doumAb180/pane/releases/download/v#{version}/Pane-#{version}-universal.dmg"
   name "Pane"
