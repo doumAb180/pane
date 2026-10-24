@@ -4,6 +4,53 @@
 
 배치 모양을 보여주는 타일을 클릭하거나, 전역 단축키로 창을 정리하세요. SwiftUI와 AppKit으로 만들었으며 라이트·다크 모드를 지원합니다.
 
+## 설치
+
+**macOS 13 이상 · Apple Silicon 및 Intel Mac 지원**
+
+아래 두 가지 방법 중 하나로 설치하세요.
+
+### DMG로 설치
+
+1. [최신 버전 다운로드](https://github.com/doumAb180/pane/releases/latest)에서 `Pane-버전-universal.dmg` 파일을 받습니다.
+2. DMG를 열고 **Pane.app을 Applications 폴더로 드래그**합니다.
+3. 응용 프로그램 폴더에서 **Pane**을 실행합니다.
+4. 화면 위 메뉴 막대에 Pane 아이콘이 나타나면 아래 **첫 실행 설정**을 진행합니다.
+
+### Homebrew로 설치
+
+[Homebrew](https://brew.sh)가 설치되어 있다면 터미널에서 실행하세요.
+
+```sh
+brew tap doumab180/pane https://github.com/doumAb180/pane
+brew install --cask doumab180/pane/pane
+open -a Pane
+```
+
+이 저장소를 전용 tap으로 사용합니다. 설치 후 아래 **첫 실행 설정**을 진행하세요.
+
+### 첫 실행 설정
+
+1. 메뉴 막대에서 **Pane → 접근성 설정 열기**를 누릅니다.
+2. **시스템 설정 → 개인정보 보호 및 보안 → 접근성**에서 **Pane**을 켭니다. macOS 버전에 따라 **기기 제어 및 데이터 접근**으로 표시될 수 있습니다.
+3. 목록에 Pane이 없으면 **+**를 눌러 응용 프로그램 폴더의 `Pane.app`을 추가합니다.
+4. 배치할 앱의 창을 클릭하고 **Control + Option + ←**를 누릅니다. 한 번은 왼쪽 ½, 한 번 더 누르면 왼쪽 ¼로 배치됩니다.
+
+접근성 권한은 다른 앱의 창을 이동하고 크기를 바꾸는 데 필요합니다. 단축키 대신 메뉴 막대의 Pane을 열어 배치 타일을 클릭해도 됩니다.
+
+### 업데이트
+
+- **DMG로 설치한 경우:** Pane을 종료한 뒤 최신 DMG의 앱으로 기존 앱을 교체합니다.
+- **Homebrew로 설치한 경우:** Pane을 종료한 뒤 아래 명령을 실행합니다.
+
+```sh
+brew update
+brew upgrade --cask doumab180/pane/pane
+open -a Pane
+```
+
+업데이트 후 권한 안내가 계속 뜨면 [사용 팁](#사용-팁)의 권한 재설정 방법을 확인하세요.
+
 ## 주요 기능
 
 - **반복해서 크기 전환**: 같은 방향을 반복하면 `½ → ¼ → ½`로 전환됩니다. 좌우는 높이를 유지하고, 상하는 너비를 유지합니다.
@@ -12,38 +59,6 @@
 - 모니터 간 이동과 메뉴 막대·Dock을 제외한 영역에 배치
 - 창 사이 여백 설정, 단축키 끄기, 충돌을 피하기 위한 Command 키 추가
 - 현재 대상 앱과 실행 결과 표시
-
-## 시작하기
-
-macOS 13 이상에서 사용할 수 있습니다.
-
-### 소스로 빌드
-
-Swift 5.9 이상을 지원하는 Xcode 또는 Command Line Tools가 필요합니다.
-
-```sh
-git clone https://github.com/doumAb180/pane.git
-cd pane
-bash scripts/build.sh
-open dist
-```
-
-`dist/Pane.app`을 응용 프로그램 폴더로 옮긴 뒤 실행하세요. 메뉴 막대에 Pane 아이콘이 나타납니다.
-
-처음 실행한 뒤 **시스템 설정 → 개인정보 보호 및 보안 → 접근성**에서 Pane을 켜 주세요. 다른 앱의 창을 이동하고 크기를 바꾸는 데 사용합니다. 배치할 창을 클릭한 뒤 메뉴 막대에서 Pane을 열면 됩니다.
-
-### 앱 다운로드
-
-[최신 릴리스](https://github.com/doumAb180/pane/releases/latest)에서 **Universal DMG**를 받아 여세요. `Pane.app`을 옆의 `Applications` 폴더로 드래그하면 됩니다. Apple Silicon과 Intel Mac을 모두 지원합니다.
-
-### Homebrew
-
-```sh
-brew tap doumab180/pane https://github.com/doumAb180/pane
-brew install --cask doumab180/pane/pane
-```
-
-이 저장소를 전용 tap으로 사용합니다. 업데이트는 `brew update` 후 `brew upgrade --cask doumab180/pane/pane`으로 할 수 있습니다.
 
 ## 단축키
 
@@ -72,6 +87,17 @@ brew install --cask doumab180/pane/pane
 - 현재 버전은 단축키와 패널 배치를 지원합니다. 화면 가장자리 드래그 스냅과 개별 단축키 편집은 아직 지원하지 않습니다.
 
 ## 개발 및 공유
+
+소스로 빌드하려면 Swift 5.9 이상을 지원하는 Xcode 또는 Command Line Tools가 필요합니다.
+
+```sh
+git clone https://github.com/doumAb180/pane.git
+cd pane
+bash scripts/build.sh
+open dist
+```
+
+생성된 `dist/Pane.app`을 응용 프로그램 폴더로 옮겨 실행하고, 위의 **첫 실행 설정**을 진행하세요.
 
 ```sh
 swift test                        # 배치·좌표·모니터 이동 테스트
