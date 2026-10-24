@@ -35,3 +35,4 @@ ditto -c -k --sequesterRsrc --keepParent "$app" "$archive"
 (cd dist && shasum -a 256 "$(basename "$archive")" > "$(basename "$archive").sha256")
 echo "Built: $app"
 echo "Archive: $archive"
+bash scripts/package-dmg.sh "$app"

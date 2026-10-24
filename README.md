@@ -34,7 +34,16 @@ open dist
 
 ### 앱 다운로드
 
-배포 버전이 있으면 [Releases](https://github.com/doumAb180/pane/releases)에서 ZIP을 받아 압축을 풀고 `Pane.app`을 응용 프로그램 폴더로 옮기세요.
+[최신 릴리스](https://github.com/doumAb180/pane/releases/latest)에서 **Universal DMG**를 받아 여세요. `Pane.app`을 옆의 `Applications` 폴더로 드래그하면 됩니다. Apple Silicon과 Intel Mac을 모두 지원합니다.
+
+### Homebrew
+
+```sh
+brew tap doumab180/pane https://github.com/doumAb180/pane
+brew install --cask doumab180/pane/pane
+```
+
+이 저장소를 전용 tap으로 사용합니다. 업데이트는 `brew update` 후 `brew upgrade --cask doumab180/pane/pane`으로 할 수 있습니다.
 
 ## 단축키
 
@@ -58,7 +67,7 @@ open dist
 - 일부 앱은 최소 창 크기가 있어 ¼ 배치를 제한할 수 있습니다. Pane이 실제 적용 결과를 안내합니다.
 - 전체 화면 모드에서는 먼저 전체 화면을 해제하세요. 최대화는 별도 Space를 만드는 전체 화면과 달리 현재 화면의 작업 영역에 창을 맞춥니다.
 - 창을 직접 옮기거나 크기를 바꾸면 다음 방향 배치는 다시 ½부터 시작합니다. 이미 정확히 ½ 위치에 있으면 ¼로 전환됩니다.
-- 앱을 옮기거나 새 빌드로 교체한 뒤 권한이 적용되지 않으면 접근성 목록에서 Pane을 제거한 후 다시 추가하세요.
+- 앱을 옮기거나 새 빌드로 교체한 뒤 권한이 적용되지 않으면 Pane을 종료하고 접근성 목록에서 제거한 후, 실제 설치 위치의 앱을 다시 추가해 켜 주세요. 그래도 계속되면 `tccutil reset Accessibility io.github.doumAb180.Pane`으로 **Pane의 권한만** 초기화하고 다시 추가하세요.
 - 자동 실행은 **시스템 설정 → 일반 → 로그인 항목**에 Pane을 추가해서 설정할 수 있습니다.
 - 현재 버전은 단축키와 패널 배치를 지원합니다. 화면 가장자리 드래그 스냅과 개별 단축키 편집은 아직 지원하지 않습니다.
 
@@ -66,13 +75,14 @@ open dist
 
 ```sh
 swift test                        # 배치·좌표·모니터 이동 테스트
-bash scripts/build.sh             # 현재 Mac용 앱과 ZIP
-bash scripts/build.sh --universal # Apple Silicon + Intel 공용 앱과 ZIP
+bash scripts/build.sh             # 현재 Mac용 앱, DMG, ZIP
+bash scripts/build.sh --universal # Apple Silicon + Intel 공용 앱, DMG, ZIP
+bash scripts/package-dmg.sh       # 기존 dist/Pane.app을 재빌드 없이 DMG로 포장
 ```
 
 결과물은 `dist/`에 생성됩니다. 버전을 지정하려면 `VERSION=0.2.0 bash scripts/build.sh --universal`처럼 실행하세요.
 
-GitHub Actions가 `main` 업데이트와 PR에서 테스트·빌드를 실행합니다. `v0.1.0` 형태의 버전 태그를 푸시하면 Universal ZIP과 SHA-256 체크섬을 GitHub Releases에 게시합니다.
+GitHub Actions가 `main` 업데이트와 PR에서 테스트·빌드를 실행합니다. `v0.1.0` 형태의 버전 태그를 푸시하면 Universal DMG·ZIP과 SHA-256 체크섬을 GitHub Releases에 게시하고, `main`의 Homebrew Cask를 해당 DMG의 체크섬으로 갱신합니다.
 
 ```sh
 git tag v0.1.0
@@ -84,7 +94,8 @@ git push origin v0.1.0
 | `Sources/Pane` | 패널, 설정, 단축키, 접근성 기반 창 제어 |
 | `Sources/PaneCore` | 배치 전환과 화면 좌표 계산 |
 | `Tests/PaneCoreTests` | 배치·다중 모니터 로직 테스트 |
-| `scripts` | 앱 번들·아이콘·ZIP 생성 |
+| `scripts` | 앱 번들·아이콘·DMG·ZIP 생성 |
+| `Casks/pane.rb` | Homebrew 설치 정보와 DMG 체크섬 |
 
 외부 패키지 의존성, 분석 도구, 자동 업데이트는 없습니다. 설정은 이 Mac에 저장되며 창 정보는 외부로 전송하지 않습니다.
 
