@@ -1,10 +1,33 @@
 import Foundation
+import CoreGraphics
 
 public enum Layout: String, CaseIterable {
     case left, right, top, bottom
     case topLeft, topRight, bottomLeft, bottomRight
     case firstThird, middleThird, lastThird
     case maximize, center
+
+    /// Repeating a directional placement toggles half ↔ quarter on that axis.
+    /// Inspect actual geometry so moving a window manually resets the cycle.
+    public func nextFrame(in bounds: CGRect, current: CGRect, gap: CGFloat) -> CGRect {
+        let half = frame(in: bounds, current: current, gap: gap)
+        guard [.left, .right, .top, .bottom].contains(self),
+              abs(current.minX - half.minX) < 3, abs(current.minY - half.minY) < 3,
+              abs(current.width - half.width) < 3, abs(current.height - half.height) < 3 else { return half }
+        let gap = min(max(0, gap), min(bounds.width, bounds.height) / 10)
+        let area = bounds.insetBy(dx: gap, dy: gap)
+        var quarter = half
+        switch self {
+        case .left, .right:
+            quarter.size.width = (area.width - 3 * gap) / 4
+            if self == .right { quarter.origin.x = area.maxX - quarter.width }
+        case .top, .bottom:
+            quarter.size.height = (area.height - 3 * gap) / 4
+            if self == .bottom { quarter.origin.y = area.maxY - quarter.height }
+        default: break
+        }
+        return quarter
+    }
 
     /// All rectangles use Accessibility's top-left coordinate system, in points.
     public func frame(in bounds: CGRect, current: CGRect, gap: CGFloat) -> CGRect {
