@@ -33,26 +33,38 @@ enum Action: Int, CaseIterable {
         })
     }
 
-    var title: String {
+    var titleText: LocalizedText {
         switch self {
-        case .left: return "왼쪽 절반"
-        case .right: return "오른쪽 절반"
-        case .top: return "위쪽 절반"
-        case .bottom: return "아래쪽 절반"
-        case .topLeft: return "왼쪽 위"
-        case .topRight: return "오른쪽 위"
-        case .bottomLeft: return "왼쪽 아래"
-        case .bottomRight: return "오른쪽 아래"
-        case .firstThird: return "왼쪽 ⅓"
-        case .middleThird: return "가운데 ⅓"
-        case .lastThird: return "오른쪽 ⅓"
-        case .maximize: return "최대화"
-        case .center: return "가운데 정렬"
-        case .restore: return "이전 배치 복원"
-        case .previousScreen: return "이전 모니터"
-        case .nextScreen: return "다음 모니터"
+        case .left: return .key("Left half")
+        case .right: return .key("Right half")
+        case .top: return .key("Top half")
+        case .bottom: return .key("Bottom half")
+        case .topLeft: return .key("Top left")
+        case .topRight: return .key("Top right")
+        case .bottomLeft: return .key("Bottom left")
+        case .bottomRight: return .key("Bottom right")
+        case .firstThird: return .key("Left third")
+        case .middleThird: return .key("Middle third")
+        case .lastThird: return .key("Right third")
+        case .maximize: return .key("Maximize")
+        case .center: return .key("Center window")
+        case .restore: return .key("Restore previous layout")
+        case .previousScreen: return .key("Previous display")
+        case .nextScreen: return .key("Next display")
         }
     }
+
+    var shortTitleText: LocalizedText {
+        switch self {
+        case .left: return .key("Left")
+        case .right: return .key("Right")
+        case .top: return .key("Top")
+        case .bottom: return .key("Bottom")
+        default: return titleText
+        }
+    }
+
+    func title(in language: AppLanguage) -> String { titleText.rendered(in: language) }
 
     var layout: Layout? {
         switch self {

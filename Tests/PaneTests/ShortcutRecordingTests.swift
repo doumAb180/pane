@@ -50,7 +50,7 @@ final class ShortcutRecordingTests: XCTestCase {
         _ = model.handleRecordingEvent(event(.keyUp, code: 124))
         XCTAssertEqual(model.recordingAction, .left)
         XCTAssertTrue(model.recordingError)
-        XCTAssertTrue(model.recordingMessage.contains(Action.right.title))
+        XCTAssertTrue(model.recordingMessage.contains(Action.right.title(in: model.language)))
         XCTAssertEqual(model.bindings["left"], original)
         _ = model.handleRecordingEvent(event(.keyDown, code: 123, flags: [.control, .option]))
         _ = model.handleRecordingEvent(event(.keyUp, code: 123))

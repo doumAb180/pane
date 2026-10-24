@@ -40,7 +40,7 @@ This repository serves as a custom Homebrew tap. After installation, follow **Fi
 
 Accessibility permission lets Pane move and resize other apps' windows. You can also open Pane from the menu bar and click a layout tile.
 
-The current app interface is in Korean; both English and Korean documentation are available.
+The interface supports English, Korean, Spanish, Simplified Chinese, Japanese, French, and German. Choose a language in **Settings → Language**, or follow your system language. Changes apply immediately.
 
 ### Updating
 
@@ -82,17 +82,23 @@ The default modifier is **Control + Option (⌃⌥)**. Hover over a tile to see 
 ### Customize shortcuts
 
 1. Open **Pane → Settings** (the sliders icon).
-2. Under **단축키 녹음** (Record shortcuts), click the shortcut next to an action.
+2. Under **Record shortcuts**, click the shortcut next to an action.
 3. Press the new combination, including at least one of **Control, Option, or Command**. Shift can also be included.
 4. Release the key to save. Changes apply immediately and persist after restarting Pane.
 
-If another Pane action already uses the combination, Pane shows that action's name and keeps the existing binding. Try another combination, or press **Esc** / click **취소** (Cancel). Closing the panel or switching apps also cancels recording. Pane's global shortcuts pause while recording.
+If another Pane action already uses the combination, Pane shows that action's name and keeps the existing binding. Try another combination, or press **Esc** / click **Cancel**. Closing the panel or switching apps also cancels recording. Pane's global shortcuts pause while recording.
 
-Use **모든 단축키 기본값 복원** (Restore all defaults) to reset the bindings after confirmation. Existing settings that added Command to all shortcuts are preserved when upgrading. Conflict checking covers Pane's saved shortcuts; macOS and other apps can reserve combinations that Pane cannot capture or register.
+Use **Restore all shortcut defaults** to reset the bindings after confirmation. Existing settings that added Command to all shortcuts are preserved when upgrading. Conflict checking covers Pane's saved shortcuts; macOS and other apps can reserve combinations that Pane cannot capture or register.
 
 Letter shortcuts use the physical key positions of a US keyboard. Displays follow the order provided by macOS and wrap around at either end.
 
 <a id="사용-팁"></a>
+
+## Language and saved settings
+
+Open **Pane → Settings → Language** to choose **Follow system**, English, 한국어, Español, 简体中文, 日本語, Français, or Deutsch. Unsupported system languages fall back to English. Chinese uses Simplified Chinese.
+
+Your language, custom shortcuts, window gap, and global shortcut toggle are saved locally using macOS UserDefaults in the `io.github.doumAb180.Pane` preferences domain (normally `~/Library/Preferences/io.github.doumAb180.Pane.plist`). They survive quitting, restarting, and normal app updates. Nothing is uploaded. Resetting shortcuts does not reset your language. Removing preferences manually or uninstalling with Homebrew’s `--zap` removes the saved settings.
 
 ## Tips
 
@@ -124,7 +130,7 @@ bash scripts/build.sh --universal # App, DMG, and ZIP for Apple Silicon and Inte
 bash scripts/package-dmg.sh       # Package the existing dist/Pane.app without rebuilding
 ```
 
-Build outputs are written to `dist/`. To set a version, run `VERSION=0.2.0 bash scripts/build.sh --universal`.
+Build outputs are written to `dist/`. To set a version, run `VERSION=0.3.0 bash scripts/build.sh --universal`.
 
 GitHub Actions runs tests and builds on updates to `main` and pull requests. Pushing a version tag such as `v0.1.0` publishes a Universal DMG, ZIP, and SHA-256 checksums to GitHub Releases, then updates the Homebrew Cask on `main` with the DMG's checksum.
 

@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-version="${VERSION:-0.1.0}"
+version="${VERSION:-0.3.0}"
 if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   echo 'VERSION must have the form 1.2.3' >&2
   exit 1

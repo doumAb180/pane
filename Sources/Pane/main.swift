@@ -23,10 +23,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "rectangle.split.2x1", accessibilityDescription: "Pane 창 배치")
+            button.image = NSImage(systemSymbolName: "rectangle.split.2x1", accessibilityDescription: model.text("Pane window layouts"))
             button.target = self
             button.action = #selector(togglePopover)
-            button.toolTip = "Pane · 창을 제자리에"
+            button.toolTip = model.text("Pane · Every window in its place")
+        }
+        model.onLanguageChange = { [weak self] in
+            guard let self else { return }
+            self.statusItem.button?.toolTip = self.model.text("Pane · Every window in its place")
+            self.statusItem.button?.setAccessibilityLabel(self.model.text("Pane window layouts"))
         }
         popover.behavior = .transient
         popover.delegate = self

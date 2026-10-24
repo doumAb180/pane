@@ -6,7 +6,7 @@
 
 배치 모양을 보여주는 타일을 클릭하거나, 전역 단축키로 창을 정리하세요. SwiftUI와 AppKit으로 만들었으며 라이트·다크 모드를 지원합니다.
 
-현재 앱 UI는 한국어이며, 사용 문서는 영어와 한국어로 제공합니다.
+앱 UI는 영어, 한국어, 스페인어, 중국어 간체, 일본어, 프랑스어, 독일어를 지원합니다. **설정 → 언어**에서 선택하면 즉시 적용됩니다.
 
 ## 설치
 
@@ -92,6 +92,12 @@ Pane의 다른 동작이 이미 사용하는 조합이면 해당 동작 이름�
 
 문자 키는 영문 키보드의 물리적 위치를 기준으로 합니다. 모니터 순서는 macOS가 제공하는 화면 순서를 따르며 마지막 화면 다음에는 첫 화면으로 돌아갑니다.
 
+## 언어와 설정 저장
+
+**Pane → 설정 → 언어**에서 **시스템 설정 따르기**, English, 한국어, Español, 简体中文, 日本語, Français, Deutsch 중 하나를 선택할 수 있습니다. 지원하지 않는 시스템 언어는 영어로 표시하며, 중국어는 간체로 제공합니다.
+
+언어, 사용자 단축키, 창 사이 여백, 전역 단축키 사용 여부는 macOS UserDefaults를 통해 **이 Mac에 저장**됩니다. 설정 영역은 `io.github.doumAb180.Pane`이며 일반적인 파일 위치는 `~/Library/Preferences/io.github.doumAb180.Pane.plist`입니다. 앱을 종료하거나 재실행하고, 일반 업데이트를 해도 유지되며 외부로 전송하지 않습니다. 단축키 초기화는 언어 설정에 영향을 주지 않습니다. 설정 파일을 직접 삭제하거나 Homebrew의 `--zap`으로 제거하면 저장된 설정도 삭제됩니다.
+
 ## 사용 팁
 
 - Spectacle, Rectangle 등 다른 앱이 같은 단축키를 사용한다면 해당 단축키를 끄거나 Pane 설정에서 다른 조합을 녹음하세요. 등록 실패한 단축키는 설정에 표시됩니다.
@@ -122,7 +128,7 @@ bash scripts/build.sh --universal # Apple Silicon + Intel 공용 앱, DMG, ZIP
 bash scripts/package-dmg.sh       # 기존 dist/Pane.app을 재빌드 없이 DMG로 포장
 ```
 
-결과물은 `dist/`에 생성됩니다. 버전을 지정하려면 `VERSION=0.2.0 bash scripts/build.sh --universal`처럼 실행하세요.
+결과물은 `dist/`에 생성됩니다. 버전을 지정하려면 `VERSION=0.3.0 bash scripts/build.sh --universal`처럼 실행하세요.
 
 GitHub Actions가 `main` 업데이트와 PR에서 테스트·빌드를 실행합니다. `v0.1.0` 형태의 버전 태그를 푸시하면 Universal DMG·ZIP과 SHA-256 체크섬을 GitHub Releases에 게시하고, `main`의 Homebrew Cask를 해당 DMG의 체크섬으로 갱신합니다.
 

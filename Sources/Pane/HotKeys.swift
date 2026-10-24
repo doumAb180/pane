@@ -5,7 +5,7 @@ final class HotKeys {
     private var handler: EventHandlerRef?
     private var registrations: [EventHotKeyRef] = []
     private let perform: (Action) -> Void
-    private(set) var failures: [String] = []
+    private(set) var failures: [LocalizedText] = []
     static let signature: OSType = 0x50414E45
 
     init(perform: @escaping (Action) -> Void) {
@@ -23,13 +23,13 @@ final class HotKeys {
             owner.perform(action)
             return noErr
         }, 1, &type, Unmanaged.passUnretained(self).toOpaque(), &handler)
-        if status != noErr { failures = ["단축키 이벤트 등록 실패 (\(status))"] }
+        if status != noErr { failures = [.key("Could not register keyboard events.")] }
     }
 
     func register(enabled: Bool, bindings: ShortcutBindings) {
         unregister()
         guard enabled else { failures = []; return }
-        guard handler != nil else { failures = ["단축키 이벤트를 등록할 수 없습니다."]; return }
+        guard handler != nil else { failures = [.key("Could not register keyboard events.")]; return }
         failures = []
         for action in Action.allCases {
             guard let shortcut = bindings[action.shortcutID] else { continue }
@@ -38,7 +38,7 @@ final class HotKeys {
             let status = RegisterEventHotKey(shortcut.keyCode, shortcut.carbonModifiers, identifier,
                                              GetApplicationEventTarget(), 0, &reference)
             if status == noErr, let reference { registrations.append(reference) }
-            else { failures.append(action.title) }
+            else { failures.append(action.titleText) }
         }
     }
 

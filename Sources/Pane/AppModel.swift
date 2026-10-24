@@ -4,12 +4,26 @@ import SwiftUI
 import PaneCore
 
 final class AppModel: ObservableObject {
-    @Published var targetName = "창을 선택해 주세요"
+    @Published private var selectedTargetName: String?
+    var targetName: String { selectedTargetName ?? text("Select a window") }
     @Published var targetIcon: NSImage?
     @Published var trusted = false
-    @Published var message = "배치할 창을 선택하고 Pane을 열어 주세요"
+    @Published private var messageText: LocalizedText = .key("Select a window to arrange, then open Pane")
+    var message: String { messageText.rendered(in: language) }
     @Published var isError = false
-    @Published var shortcutFailures: [String] = []
+    @Published private var shortcutFailureTexts: [LocalizedText] = []
+    var shortcutFailures: [String] { shortcutFailureTexts.map { $0.rendered(in: language) } }
+    @Published var language: AppLanguage {
+        didSet {
+            defaults.set(language.rawValue, forKey: "appLanguage.v1")
+            onLanguageChange?()
+        }
+    }
+    var onLanguageChange: (() -> Void)?
+
+    func text(_ key: String, _ arguments: String...) -> String {
+        LocalizedText.key(key, arguments.map { .verbatim($0) }).rendered(in: language)
+    }
     @Published var gap: Int {
         didSet { defaults.set(gap, forKey: "gap") }
     }
@@ -18,7 +32,8 @@ final class AppModel: ObservableObject {
     }
     @Published private(set) var bindings: ShortcutBindings
     @Published private(set) var recordingAction: Action?
-    @Published private(set) var recordingMessage = ""
+    @Published private var recordingText: LocalizedText = .verbatim("")
+    var recordingMessage: String { recordingText.rendered(in: language) }
     @Published private(set) var recordingError = false
     private let defaults: UserDefaults
     private var eventMonitor: Any?
@@ -33,6 +48,7 @@ final class AppModel: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        language = AppLanguage(rawValue: defaults.string(forKey: "appLanguage.v1") ?? "system") ?? .system
         defaults.register(defaults: ["gap": 8, "shortcutsEnabled": true, "extraCommand": false])
         gap = defaults.integer(forKey: "gap")
         shortcutsEnabled = defaults.bool(forKey: "shortcutsEnabled")
@@ -51,13 +67,13 @@ final class AppModel: ObservableObject {
     }
 
     func shortcutLabel(for action: Action) -> String {
-        bindings[action.shortcutID]?.label ?? "미설정"
+        bindings[action.shortcutID]?.label ?? text("Not set")
     }
 
     func startRecording(_ action: Action) {
         cancelRecording()
         recordingAction = action
-        recordingMessage = "새 조합을 눌러 주세요 · Esc로 취소"
+        recordingText = .key("Press a new combination · Esc to cancel")
         recordingError = false
         configureShortcuts()
         onBeginRecording?()
@@ -79,7 +95,7 @@ final class AppModel: ObservableObject {
                     try bindings.assign(shortcut, to: action.shortcutID)
                     saveBindings()
                     cancelRecording()
-                    recordingMessage = "\(action.title) · \(shortcut.label) 저장됨"
+                    recordingText = .key("{0} · {1} saved", [action.titleText, .verbatim(shortcut.label)])
                 } catch { showRecordingError(error) }
             }
             return nil
@@ -96,7 +112,7 @@ final class AppModel: ObservableObject {
             try bindings.validate(shortcut, for: action.shortcutID)
             pendingShortcut = shortcut
             recordingError = false
-            recordingMessage = "\(shortcut.label) · 키를 놓으면 저장됩니다"
+            recordingText = .key("{0} · Release the key to save", [.verbatim(shortcut.label)])
         } catch { showRecordingError(error) }
         return nil
     }
@@ -106,9 +122,9 @@ final class AppModel: ObservableObject {
         recordingError = true
         if case ShortcutBindingError.conflict(let id) = error,
            let other = Action.allCases.first(where: { $0.shortcutID == id }) {
-            recordingMessage = "‘\(other.title)’에서 사용 중이에요. 다른 조합을 눌러 주세요."
+            recordingText = .key("Already used by “{0}”. Try another combination.", [other.titleText])
         } else {
-            recordingMessage = "Control, Option, Command 중 하나 이상과 다른 키를 함께 눌러 주세요."
+            recordingText = .key("Include Control, Option, or Command with another key.")
         }
     }
 
@@ -120,7 +136,7 @@ final class AppModel: ObservableObject {
         pendingShortcut = nil
         let wasRecording = recordingAction != nil
         recordingAction = nil
-        recordingMessage = ""
+        recordingText = .verbatim("")
         recordingError = false
         if wasRecording { configureShortcuts() }
     }
@@ -130,7 +146,7 @@ final class AppModel: ObservableObject {
         bindings.reset()
         saveBindings()
         configureShortcuts()
-        recordingMessage = "모든 단축키를 기본값으로 복원했습니다"
+        recordingText = .key("All shortcuts restored to defaults")
     }
 
     private func saveBindings() {
@@ -143,10 +159,10 @@ final class AppModel: ObservableObject {
         if app?.processIdentifier != ProcessInfo.processInfo.processIdentifier {
             targetApplication = app
         }
-        targetName = targetApplication?.localizedName ?? "창을 선택해 주세요"
+        selectedTargetName = targetApplication?.localizedName
         targetIcon = targetApplication?.icon
         target = try? manager.target(for: targetApplication)
-        message = trusted ? "원하는 배치를 골라 주세요" : "처음 한 번, 접근성 권한이 필요해요"
+        messageText = trusted ? .key("Choose a layout") : .key("Accessibility permission is needed to get started")
         isError = false
     }
 
@@ -156,7 +172,7 @@ final class AppModel: ObservableObject {
             trusted = value
             if value {
                 target = try? manager.target(for: targetApplication)
-                message = "준비됐어요. 배치할 창에서 Pane을 다시 열어 주세요"
+                messageText = .key("Ready. Select a window and reopen Pane")
                 isError = false
             }
         }
@@ -170,10 +186,10 @@ final class AppModel: ObservableObject {
             let selected: WindowTarget
             if let target { selected = target }
             else { selected = try manager.target(for: targetApplication); target = selected }
-            message = try manager.perform(action, target: selected, gap: CGFloat(gap))
+            messageText = try manager.perform(action, target: selected, gap: CGFloat(gap))
             isError = false
         } catch {
-            message = error.localizedDescription
+            messageText = (error as? WindowFailure)?.text ?? .verbatim(error.localizedDescription)
             isError = true
         }
         trusted = manager.isTrusted
@@ -192,7 +208,7 @@ final class AppModel: ObservableObject {
 
     private func configureShortcuts() {
         hotKeys?.register(enabled: shortcutsEnabled && recordingAction == nil, bindings: bindings)
-        shortcutFailures = hotKeys?.failures ?? []
+        shortcutFailureTexts = hotKeys?.failures ?? []
     }
 
     deinit {

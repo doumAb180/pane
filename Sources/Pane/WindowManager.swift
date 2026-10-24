@@ -8,10 +8,10 @@ struct WindowTarget {
     let pid: pid_t
 }
 
-enum WindowFailure: LocalizedError {
+enum WindowFailure: Error {
     case message(String)
-    var errorDescription: String? {
-        switch self { case .message(let text): return text }
+    var text: LocalizedText {
+        switch self { case .message(let key): return .key(key) }
     }
 }
 
@@ -34,28 +34,28 @@ final class WindowManager {
     }
 
     func target(for app: NSRunningApplication?) throws -> WindowTarget {
-        guard isTrusted else { throw WindowFailure.message("접근성 권한을 켜면 창을 배치할 수 있어요.") }
+        guard isTrusted else { throw WindowFailure.message("Enable accessibility permission to arrange windows.") }
         guard let app, app.processIdentifier != ProcessInfo.processInfo.processIdentifier,
-              !app.isTerminated else { throw WindowFailure.message("배치할 앱의 창을 먼저 선택해 주세요.") }
+              !app.isTerminated else { throw WindowFailure.message("Select an app window first.") }
         let application = AXUIElementCreateApplication(app.processIdentifier)
         AXUIElementSetMessagingTimeout(application, 0.8)
         guard let value = attribute(application, kAXFocusedWindowAttribute),
               CFGetTypeID(value) == AXUIElementGetTypeID() else {
-            throw WindowFailure.message("선택한 앱에 배치할 수 있는 창이 없어요.")
+            throw WindowFailure.message("The selected app has no window to arrange.")
         }
         let window = unsafeBitCast(value, to: AXUIElement.self)
         AXUIElementSetMessagingTimeout(window, 0.8)
-        return WindowTarget(window: window, name: app.localizedName ?? "앱", pid: app.processIdentifier)
+        return WindowTarget(window: window, name: app.localizedName ?? "", pid: app.processIdentifier)
     }
 
-    func perform(_ action: Action, target: WindowTarget, gap: CGFloat) throws -> String {
-        guard isTrusted else { throw WindowFailure.message("접근성 권한을 확인해 주세요.") }
+    func perform(_ action: Action, target: WindowTarget, gap: CGFloat) throws -> LocalizedText {
+        guard isTrusted else { throw WindowFailure.message("Check accessibility permission.") }
         if (attribute(target.window, "AXFullScreen") as? Bool) == true {
-            throw WindowFailure.message("전체 화면 모드를 해제한 뒤 다시 시도해 주세요.")
+            throw WindowFailure.message("Exit full-screen mode and try again.")
         }
         let current = try frame(of: target.window)
         let screens = NSScreen.screens
-        guard let primary = screens.first else { throw WindowFailure.message("화면을 찾을 수 없어요.") }
+        guard let primary = screens.first else { throw WindowFailure.message("No display found.") }
         let visible = screens.map {
             ScreenGeometry.accessibilityFrame(fromAppKit: $0.visibleFrame, primaryTop: primary.frame.maxY)
         }
@@ -63,24 +63,24 @@ final class WindowManager {
             ScreenGeometry.accessibilityFrame(fromAppKit: $0.frame, primaryTop: primary.frame.maxY)
         }
         guard let index = ScreenGeometry.bestScreen(for: current, screens: full) else {
-            throw WindowFailure.message("화면을 찾을 수 없어요.")
+            throw WindowFailure.message("No display found.")
         }
         let destination: CGRect
         if let layout = action.layout {
             destination = layout.nextFrame(in: visible[index], current: current, gap: gap)
         } else if action == .restore {
             guard let saved = history.last(where: { $0.pid == target.pid && CFEqual($0.window, target.window) }) else {
-                throw WindowFailure.message("이 창에는 복원할 배치가 아직 없어요.")
+                throw WindowFailure.message("No previous layout to restore for this window.")
             }
             // A disconnected display must not strand the restored window off-screen.
             let screen = ScreenGeometry.bestScreen(for: saved.frame, screens: visible) ?? index
             destination = fitted(saved.frame, inside: visible[screen])
         } else {
-            guard screens.count > 1 else { throw WindowFailure.message("연결된 모니터가 하나뿐이에요.") }
+            guard screens.count > 1 else { throw WindowFailure.message("Only one display is connected.") }
             let next = (index + (action == .nextScreen ? 1 : screens.count - 1)) % screens.count
             destination = ScreenGeometry.move(current, from: visible[index], to: visible[next])
         }
-        if approximatelyEqual(current, destination) { return "이미 선택한 위치에 있어요" }
+        if approximatelyEqual(current, destination) { return .key("Already in the selected position") }
         // Store before writes so even a partial AX failure can be undone.
         let previous = history.firstIndex { $0.pid == target.pid && CFEqual($0.window, target.window) }
         if let previous { history.remove(at: previous) }
@@ -89,14 +89,14 @@ final class WindowManager {
         try setFrame(destination, on: target.window)
         let actual = try frame(of: target.window)
         if !approximatelyEqual(actual, destination) {
-            return "배치했어요 · 앱의 창 크기 제한이 적용됐어요"
+            return .key("Arranged · This app limits its window size")
         }
         if let layout = action.layout, [.left, .right, .top, .bottom].contains(action) {
             let half = layout.frame(in: visible[index], current: current, gap: gap)
             let fraction = approximatelyEqual(destination, half) ? "½" : "¼"
-            return "\(action.title.replacingOccurrences(of: " 절반", with: "")) \(fraction) 배치 완료"
+            return .key("{0} {1} applied", [action.shortTitleText, .verbatim(fraction)])
         }
-        return "\(action.title) 완료"
+        return .key("{0} complete", [action.titleText])
     }
 
     private func attribute(_ element: AXUIElement, _ name: String) -> CFTypeRef? {
@@ -108,13 +108,13 @@ final class WindowManager {
     private func frame(of window: AXUIElement) throws -> CGRect {
         guard let p = attribute(window, kAXPositionAttribute), let s = attribute(window, kAXSizeAttribute),
               CFGetTypeID(p) == AXValueGetTypeID(), CFGetTypeID(s) == AXValueGetTypeID() else {
-            throw WindowFailure.message("창 정보를 읽지 못했어요. 창을 다시 선택해 주세요.")
+            throw WindowFailure.message("Could not read window information. Select the window again.")
         }
         var point = CGPoint.zero
         var size = CGSize.zero
         guard AXValueGetValue(unsafeBitCast(p, to: AXValue.self), .cgPoint, &point),
               AXValueGetValue(unsafeBitCast(s, to: AXValue.self), .cgSize, &size) else {
-            throw WindowFailure.message("창 위치를 읽을 수 없어요.")
+            throw WindowFailure.message("Could not read the window position.")
         }
         return CGRect(origin: point, size: size)
     }
@@ -130,7 +130,7 @@ final class WindowManager {
         let resize = AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, s)
         _ = AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, p)
         guard move == .success, resize == .success else {
-            throw WindowFailure.message("이 창은 이동 또는 크기 변경을 지원하지 않아요.")
+            throw WindowFailure.message("This window does not support moving or resizing.")
         }
     }
 
