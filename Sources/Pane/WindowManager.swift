@@ -91,6 +91,11 @@ final class WindowManager {
         if !approximatelyEqual(actual, destination) {
             return "배치했어요 · 앱의 창 크기 제한이 적용됐어요"
         }
+        if let layout = action.layout, [.left, .right, .top, .bottom].contains(action) {
+            let half = layout.frame(in: visible[index], current: current, gap: gap)
+            let fraction = approximatelyEqual(destination, half) ? "½" : "¼"
+            return "\(action.title.replacingOccurrences(of: " 절반", with: "")) \(fraction) 배치 완료"
+        }
         return "\(action.title) 완료"
     }
 

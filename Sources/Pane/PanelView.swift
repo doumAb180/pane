@@ -202,8 +202,10 @@ private struct LayoutTile: View {
                 .background(hover ? accent.opacity(0.12) : Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 12))
                 .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(hover ? accent.opacity(0.35) : .primary.opacity(0.065)))
                 .contentShape(RoundedRectangle(cornerRadius: 12))
-        }.buttonStyle(.plain).onHover { hover = $0 }.help(action.title + " · " + shortcut)
-            .accessibilityLabel(action.title).accessibilityHint("단축키 " + shortcut)
+        }.buttonStyle(.plain).onHover { hover = $0 }
+            .help(action.title.replacingOccurrences(of: " 절반", with: " ½ ↔ ¼") + " · " + shortcut)
+            .accessibilityLabel(action.title.replacingOccurrences(of: " 절반", with: " 분할"))
+            .accessibilityHint("단축키 " + shortcut)
     }
 }
 
