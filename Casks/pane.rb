@@ -7,7 +7,7 @@ cask "pane" do
   desc "Menu bar window manager with half and quarter size cycling"
   homepage "https://github.com/doumAb180/pane"
 
-  depends_on macos: ">= :ventura"
+  depends_on macos: :ventura
 
   app "Pane.app"
 
