@@ -166,9 +166,14 @@ struct PanelView: View {
             }.frame(minHeight: 28, alignment: .topLeading).accessibilityElement(children: .combine)
             HStack {
                 Text(model.recordingAction != nil ? model.text("Recording · Window actions paused") : model.text("Customize shortcuts in settings"))
+                    .font(.system(size: 10)).foregroundStyle(.tertiary)
                 Spacer()
-                Button(model.text("Quit")) { NSApp.terminate(nil) }.buttonStyle(.plain)
-            }.font(.system(size: 10)).foregroundStyle(.tertiary)
+                Button { NSApp.terminate(nil) } label: {
+                    Label(model.text("Quit"), systemImage: "power")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.primary)
+                }.buttonStyle(.bordered).controlSize(.small)
+            }
         }
     }
 

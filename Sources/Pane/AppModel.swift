@@ -49,7 +49,7 @@ final class AppModel: ObservableObject {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         language = AppLanguage(rawValue: defaults.string(forKey: "appLanguage.v1") ?? "system") ?? .system
-        defaults.register(defaults: ["gap": 8, "shortcutsEnabled": true, "extraCommand": false])
+        defaults.register(defaults: ["gap": 0, "shortcutsEnabled": true, "extraCommand": false])
         gap = defaults.integer(forKey: "gap")
         shortcutsEnabled = defaults.bool(forKey: "shortcutsEnabled")
         var saved = defaults.data(forKey: "shortcutBindings.v1")
